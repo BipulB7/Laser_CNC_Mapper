@@ -1,0 +1,12 @@
+{
+  "format": "bowmapper-program/1",
+  "name": "Repeatability: same point 20 times",
+  "description": "Moves 5 mm away and back 20 times and measures the same point. The spread is the machine + laser repeatability.",
+  "coords": "work",
+  "defaults": {"samples": 200, "settle_ms": 500},
+  "steps": [
+    {"do": "repeat", "times": 20, "steps": [
+      {"do": "move", "x": 5, "y": 5}, {"do": "move", "x": 0, "y": 0}, {"do": "measure", "label": "P0"}
+    ]}
+  ]
+}

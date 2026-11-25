@@ -1,0 +1,12 @@
+{
+  "name": "Example die 40x47 1mm",
+  "sample_id": "",
+  "kind": "sample",
+  "regions": [{"name": "Die", "x0": -19.5, "y0": -23, "x1": 19.5, "y1": 23}],
+  "pitch_x": 1.0, "pitch_y": 1.0,
+  "pattern": "serpentine",
+  "samples": 100, "settle_ms": 300, "feed": 1500,
+  "drift_every": 50, "retries": 2, "max_std_um": 10,
+  "baseline": null,
+  "notes": "Example: work zero at the die centre. Replace the region with corners taken from the real part."
+}

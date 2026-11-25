@@ -1,0 +1,15 @@
+{
+  "format": "bowmapper-program/1",
+  "name": "Five-point check",
+  "description": "Centre + four corners of a 30 x 30 mm area around the work zero. Set work zero at the die centre and the standoff first.",
+  "coords": "work",
+  "defaults": {"samples": 200, "settle_ms": 400, "feed": 1500},
+  "steps": [
+    {"do": "move", "x": 0, "y": 0},   {"do": "measure", "label": "centre"},
+    {"do": "move", "x": -15, "y": -15}, {"do": "measure", "label": "front-left"},
+    {"do": "move", "x": 15, "y": -15},  {"do": "measure", "label": "front-right"},
+    {"do": "move", "x": 15, "y": 15},   {"do": "measure", "label": "back-right"},
+    {"do": "move", "x": -15, "y": 15},  {"do": "measure", "label": "back-left"},
+    {"do": "move", "x": 0, "y": 0},   {"do": "measure", "label": "centre again (drift)"}
+  ]
+}

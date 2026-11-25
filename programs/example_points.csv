@@ -1,0 +1,7 @@
+# x,y in work coordinates (mm). Optional columns: z, label, samples
+x,y,label,samples
+0,0,centre,200
+-10,0,left,
+10,0,right,
+0,-10,front,
+0,10,back,

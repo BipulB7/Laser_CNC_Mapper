@@ -1,0 +1,14 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Per-machine state (the app creates these)
+config.json
+logs/*
+scans/*
+!logs/.gitkeep
+!scans/.gitkeep
+
+# Micro-Epsilon MEDAQLib (proprietary). Delete this line ONLY if the repo is private.
+drivers/MEDAQLib.dll

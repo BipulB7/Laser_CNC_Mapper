@@ -1,0 +1,115 @@
+{
+  "machine": {
+    "transport": "serial",
+    "port": "COM7",
+    "baud": 115200,
+    "tcp_host": "192.168.0.1",
+    "tcp_port": 23,
+    "status_hz": 10,
+    "reset_on_connect": false,
+    "limits": {
+      "x": [
+        -2.0,
+        398.0
+      ],
+      "y": [
+        -2.0,
+        398.0
+      ],
+      "z": [
+        -128.0,
+        2.0
+      ]
+    },
+    "limits_source": "homing",
+    "limit_margin_mm": 0.5,
+    "z_floor_mpos": null,
+    "safe_z_mpos": -2.5,
+    "require_homing": true,
+    "block_spindle": true,
+    "unhomed_jog_max_mm": 25.0,
+    "travel_feed_xy": 2500.0,
+    "travel_feed_z": 500.0
+  },
+  "jog": {
+    "feed_xy": 1000.0,
+    "feed_z": 400.0,
+    "fast_factor": 2.5,
+    "fine_factor": 0.2,
+    "steps": [
+      0.01,
+      0.1,
+      1.0,
+      10.0,
+      50.0
+    ],
+    "default_step": 1.0,
+    "watchdog_s": 0.6
+  },
+  "laser": {
+    "driver": "medaq",
+    "dll_path": "drivers/MEDAQLib.dll",
+    "sensor_id": 41,
+    "interface": "auto",
+    "port": "COM5",
+    "last_ok": {
+      "interface": "RS232",
+      "baud": null,
+      "port": "COM5"
+    },
+    "baud": null,
+    "extra_params": {},
+    "smr_mm": 25.0,
+    "range_mm": 25.0,
+    "reading_zero": "auto",
+    "guard_mm": 1.0,
+    "auto_reconnect": true
+  },
+  "scan": {
+    "samples": 100,
+    "settle_ms": 300,
+    "feed": 1500.0,
+    "pattern": "serpentine",
+    "drift_every": 50,
+    "retries": 2,
+    "max_invalid_frac": 0.2,
+    "max_std_um": 10.0,
+    "raster_approach_mm": 0.5
+  },
+  "ui": {
+    "flip_x": false,
+    "flip_y": false,
+    "positions": [],
+    "theme": "auto"
+  },
+  "align": {
+    "angle_deg": 0.18791,
+    "width": 58.8521,
+    "height": 49.1677,
+    "center_machine": [
+      192.6455,
+      193.0588
+    ],
+    "corners_machine": [
+      [
+        163.3003,
+        168.3785
+      ],
+      [
+        222.152,
+        168.5715
+      ],
+      [
+        221.9907,
+        217.739
+      ],
+      [
+        163.139,
+        217.546
+      ]
+    ],
+    "source": "manual corners",
+    "time": "2026-11-24 16:43:11",
+    "session": null
+  }
+}
