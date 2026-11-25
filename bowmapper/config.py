@@ -55,7 +55,10 @@ DEFAULTS: dict = {
         "watchdog_s": 0.6,              # continuous jog stops if the browser goes quiet this long
     },
     "laser": {
-        "driver": "none",               # medaq | sim | none
+        "driver": "none",               # medaq | sim | none   ("medaq" = the real ILD1320)
+        "backend": "auto",              # auto (MEDAQLib on Windows, direct serial elsewhere) | medaq | serial
+        "serial_baud": None,            # direct serial: None = auto-detect (921600 first)
+        "serial_last_ok": None,
         "dll_path": "drivers/MEDAQLib.dll",
         "sensor_id": 41,                # ME_SENSOR.SENSOR_ILD1320
         "interface": "auto",            # auto | RS232 | IF2001_USB (auto tries both, remembers what worked)

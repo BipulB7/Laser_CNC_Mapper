@@ -182,3 +182,14 @@ There are examples in `programs\` and `recipes\`.
 | `gcode.py`, `programs.py` | Program checking and running |
 | `sim_grbl.py` | Simulated Grbl_ESP32 |
 | `server.py`, `static/` | Web server and browser UI |
+
+## Raspberry Pi / Linux
+
+The laser is read straight off the IF2001/USB serial port (`bowmapper/ild_serial.py`), so MEDAQLib is not needed.
+
+```bash
+sudo apt install -y python3-venv     # once
+bash start_pi.sh                     # then open http://<pi-ip>:8765
+```
+
+Check the laser alone (with Bow Mapper stopped): `.venv/bin/python tools/laser_serial_probe.py`

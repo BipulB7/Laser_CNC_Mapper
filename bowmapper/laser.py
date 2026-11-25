@@ -73,8 +73,14 @@ class LaserBase:
             return f"Laser port {port} not found: is the IF2001/USB plugged in and the 24 V supply on?"
         if "ACCESS_DENIED" in msg or "Access is denied" in msg:
             return f"Laser port {port} is in use by another program: close sensorTOOL."
-        if "No laser COM port" in msg:
+        if "No laser COM port" in msg or "No laser USB adapter" in msg:
             return "No laser USB adapter (FTDI) found: plug in the IF2001/USB."
+        if "Permission denied" in msg:
+            return f"No permission for {port}: add your user to the dialout group (sudo usermod -aG dialout $USER), log in again."
+        if "busy" in msg.lower() or "holding the port" in msg:
+            return f"Laser port {port} is in use by another program (a second Bow Mapper?)."
+        if "No ILD1320 data" in msg:
+            return "Laser adapter found but no sensor data: is the sensor's 24 V supply on? (details: Console tab)"
         return f"Laser: {msg[:160]}"
 
     def _loop(self) -> None:
@@ -353,6 +359,83 @@ class MedaqLaser(LaserBase):
                 raise
             time.sleep(0.01)
             return []
+
+
+class SerialLaser(LaserBase):
+    """ILD1320 read straight off the IF2001/USB serial port (no MEDAQLib): Linux / Raspberry Pi.
+
+    Shows up as the same "ILD1320" choice in the UI (driver "medaq"); the server
+    picks this class on non-Windows machines, or when laser.backend = "serial".
+    Readings are mm from the start of the measuring range, like MEDAQLib's.
+    """
+
+    driver = "medaq"
+    backend = "serial"
+    QUIET_S = 2.0
+
+    def __init__(self, cfg, bus):
+        super().__init__(cfg, bus)
+        self.ser = None
+        self.dec = None
+        self.used: dict = {}
+        self.last_state = ""
+        self._warned_master = False
+
+    def describe(self) -> str:
+        u = self.used or {}
+        return f"ILD1320 direct serial {u.get('port') or self._cfgl().get('port')}" + \
+               (f" @ {u['baud']}" if u.get("baud") else "")
+
+    def _open(self) -> None:
+        from .ild_serial import FrameDecoder, open_ild1320_serial
+        c = self._cfgl()
+        ser, used = open_ild1320_serial(c.get("port") or "auto", c.get("serial_baud"), hint=c.get("serial_last_ok"),
+                                        report=lambda s: self.bus.log("!", "laser " + s))
+        self.ser = ser
+        self.used = used
+        self._mr = float(c["range_mm"])
+        self._last_data = time.monotonic()
+        self.dec = FrameDecoder()
+        self.cfg.update({"laser": {"serial_last_ok": {"port": used["port"], "baud": used["baud"]}}})
+
+    def _close(self) -> None:
+        if self.ser:
+            try:
+                self.ser.close()
+            except Exception:
+                pass
+        self.ser = None
+
+    def _read(self) -> list[float]:
+        from .ild_serial import MAX_DIST, STATE_CODES
+        data = self.ser.read(max(1, self.ser.in_waiting))
+        now = time.monotonic()
+        if not data:
+            if now - self._last_data > self.QUIET_S:
+                raise TimeoutError(f"no data from the sensor for {self.QUIET_S:g} s")
+            return []
+        self._last_data = now
+        out = []
+        k = 102.0 / 65520.0
+        for x in self.dec.feed(data):
+            if x <= MAX_DIST:
+                out.append((k * x - 1.0) * self._mr / 100.0)
+                continue
+            out.append(SENTINEL)
+            st = STATE_CODES.get(x)
+            if st:
+                self.last_state = st
+            elif not self._warned_master:
+                self._warned_master = True
+                self.bus.note("warn", "Laser is sending zeroed/mastered values: reset zeroing/mastering on the sensor "
+                                      "(web interface or sensorTOOL); these readings are ignored.")
+        return out
+
+    def snapshot(self) -> dict:
+        s = super().snapshot()
+        s["backend"] = "serial"
+        s["last_state"] = self.last_state
+        return s
 
 
 class SimLaser(LaserBase):

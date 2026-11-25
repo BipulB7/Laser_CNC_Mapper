@@ -16,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from . import __version__, locate, programs, scan
 from .config import DIRS, ROOT, Config
 from .events import EventBus
-from .laser import MedaqLaser, NoLaser, SimLaser
+from .laser import MedaqLaser, NoLaser, SerialLaser, SimLaser
 from .machine import Machine, Refused
 from .sessions import Session, delete_session, list_sessions, slug
 
@@ -48,7 +48,11 @@ class AppState:
         if driver == "sim":
             self.laser = SimLaser(self.cfg, self.bus, self.laser_position)
         elif driver == "medaq":
-            self.laser = MedaqLaser(self.cfg, self.bus)
+            backend = self.cfg["laser"].get("backend", "auto")
+            if backend == "serial" or (backend == "auto" and os.name != "nt"):
+                self.laser = SerialLaser(self.cfg, self.bus)      # no MEDAQLib (Linux / Pi)
+            else:
+                self.laser = MedaqLaser(self.cfg, self.bus)
         else:
             self.laser = NoLaser(self.cfg, self.bus)
         self.cfg.update({"laser": {"driver": driver}})
