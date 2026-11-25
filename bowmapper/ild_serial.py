@@ -175,21 +175,25 @@ def open_ild1320_serial(port: str | None = "auto", baud: int | None = None, hint
                     say(f"OK    {port} @ {bd}: {n} values in 0.3 s")
                     return s, {"port": port, "baud": bd, "info": ""}
                 raise SerialLaserError(f"{len(data)} bytes but no valid frames (wrong baud)")
+            command(s, "", 0.3)                 # clear any half-received line in the sensor (else E204)
             ans = command(s, "GETINFO")
             if "->" not in ans:
                 raise SerialLaserError("silent, no answer to GETINFO")
             info = " ".join(ans.replace("->", " ").split())[:200]
             say(f"..    {port} @ {bd}: sensor answers but is not streaming ({info[:80]})")
             if not enable_output:
-                raise SerialLaserError("sensor answers but its data output is not RS422")
-            r = command(s, "OUTPUT RS422")
-            if re.search(r"\bE\d{3}\b", r):
-                raise SerialLaserError(f"OUTPUT RS422 refused: {r.strip()}")
+                raise SerialLaserError("sensor answers but is not streaming")
+            # Continuous output: no trigger (sensorTOOL/MEDAQLib can leave TRIGGER SOFTWARE set,
+            # which sends nothing until a software trigger), data out on RS422.
+            for c in ("TRIGGER NONE", "OUTPUT RS422"):
+                r = command(s, c)
+                if re.search(r"\bE\d{3}\b", r):
+                    raise SerialLaserError(f"{c} refused: {' '.join(r.replace('->', ' ').split())}")
             data = sniff(s, 0.4)
             ok, n = looks_like_stream(data)
             if not ok:
-                raise SerialLaserError("switched output to RS422 but no data followed")
-            say(f"OK    {port} @ {bd}: output switched to RS422, {n} values in 0.4 s")
+                raise SerialLaserError(f"set TRIGGER NONE + OUTPUT RS422 but no data followed ({len(data)} bytes)")
+            say(f"OK    {port} @ {bd}: set continuous RS422 output, {n} values in 0.4 s")
             return s, {"port": port, "baud": bd, "info": info}
         except Exception as e:
             errors.append(f"{bd}: {e}")
